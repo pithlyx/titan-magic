@@ -1,7 +1,7 @@
-import './App.css';
-import SearchBar from './components/Header/Search';
-import Body from './components/Body/Body';
-import Footer from './components/Footer/Footer';
+import "./App.css"
+import Body from "./components/Body/Body"
+import Footer from "./components/Footer/Footer"
+import SearchBar from "./components/Header/Search"
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
       </div>
       <Footer />
     </>
-  );
+  )
 }
 
-export default App;
+export default App
