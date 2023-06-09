@@ -5,7 +5,7 @@ const CheckboxOption = ({ option, selectedOptions, handleOptionClick }) => {
   const isSelected = selectedOptions.includes(option)
   return (
     <label
-      className={`flex items-center justify-between px-4 py-2 hover:bg-secondary hover:bg- cursor-pointer`}
+      className={`flex items-center justify-between px-4 py-2 text-txt hover:bg-container cursor-pointer ${isSelected && "bg-secondary"}`}
     >
       <input
         type="checkbox"
@@ -79,10 +79,10 @@ const MenuContainer = ({ onChange }: any) => {
   return (
     <div ref={dropdownRef} className="relative">
       <button
-        className="flex items-center justify-between px-4 py-2 bg-secondary rounded-md gap-x-2"
+        className="flex items-center justify-between  px-4 py-2 bg-secondary rounded-md gap-x-2"
         onClick={toggleDropdown}
       >
-        {isOpen && <span className="text-txt">Filters</span>}
+        <span className="text-black">Filters</span>
         <Untap id="logo" className="h-5 " />
       </button>
       {isOpen && (

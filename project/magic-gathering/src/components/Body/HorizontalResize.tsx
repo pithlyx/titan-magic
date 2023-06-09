@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useCallback } from "react"
 
 interface ResizablePanelsProps {
   height: number
@@ -12,9 +12,11 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({
   const [panelWidth, setPanelWidth] = useState<number>(50) // Percent
   const [leftSliderValue, setLeftSliderValue] = useState<number>(50)
   const [rightSliderValue, setRightSliderValue] = useState<number>(50)
+
   const draggingRef = useRef<boolean>(false)
   const lastXRef = useRef<number>(0)
-
+    const [cardsData, setCardsData] = useState([])
+ 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault() // Prevents text selection
     draggingRef.current = true
@@ -34,6 +36,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({
     }
   }
 
+
   const handleLeftSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLeftSliderValue(Number(e.target.value))
   }
@@ -51,12 +54,14 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({
       className={`flex border-2  overflow-y-auto border-gray-400 relative`}
     >
       <div
+        id="leftDiv"
         className="flex-grow overflow-y-auto relative"
         style={{ flexBasis: `${panelWidth}%` }}
       >
         {children[0]}
       </div>
       <div
+        id="handle"
         onMouseDown={handleMouseDown}
         className="absolute top-0 bg-secondary cursor-col-resize"
         style={{
@@ -67,6 +72,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({
         }}
       />
       <div
+        id="rightDiv"
         className="border-l-2 border-gray-400 bg-menu flex-grow overflow-y-auto relative"
         style={{ flexBasis: `${100 - panelWidth}%` }}
       >

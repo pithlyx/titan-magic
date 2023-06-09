@@ -37,8 +37,9 @@ const Header = ({ height }: any) => {
             id="navigation-section"
             className="justify-end m-auto w-1/2 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3 sm:items-center sm:justify-center lg:justify-right md:justify-center md:items-center lg:justify-end lg:items-center xl:justify-end xl:items-center"
           >
-            <NavButton hidden="View" label="Decks" linkTo="/route/carddisplay/deckdisplay" />
-            <NavButton hidden="View" label="Collections" linkTo="/route/deckdisplay/carddisplay" />
+            <NavButton label="New Deck" linkTo="/route/carddisplay/deckdisplay" />
+            <NavButton label="View Decks" linkTo="/route/deckdisplay/carddisplay" />
+            <NavButton label="Search" linkTo="/" />
           </div>
         </div>
       </div>

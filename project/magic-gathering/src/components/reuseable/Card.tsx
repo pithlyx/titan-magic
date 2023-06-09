@@ -40,9 +40,11 @@ const Card: React.FC<CardProps> = ({
   const dispatch = useDispatch()
 
   const handleCardClick = () => {
+    console.log(index)
     if (location === "search") {
       dispatch(addCard(card))
     } else if (location === "deck") {
+      console.log(index)
       dispatch(removeCard(index))
     }
     onClick()

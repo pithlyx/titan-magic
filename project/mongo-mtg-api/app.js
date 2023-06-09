@@ -32,15 +32,96 @@ app.use((err, req, res, next) => {
 router.get('/', handleConnectionCheck);
 router.get('/:db/:collection/:lang/:schema/:page', handlePage);
 
-router.post('/:db/:collection/decks', async (req, res, next) => {
+router.get('/:db/:collection/:lang/:schema/search/:page', handleSearch);
+
+async function handleSearch(req, res, next) {
+  const { db, collection, lang, schema, page = 1 } = req.params;
+  const { query } = req.query;
+
+  // Validate parameters
+  let pageNum = parseInt(page, 10);
+
+  if (isNaN(pageNum) || pageNum < 1) {
+    return res
+      .status(400)
+      .json({ error: 'Page must be a non-negative integer.' });
+  }
+
   try {
-    const { db, collection } = req.params;
+    await client.connect();
+    const selectedCollection = client.db(db).collection(collection);
+
+    const totalDocuments = await selectedCollection.countDocuments({ lang });
+    const totalPages = Math.ceil(totalDocuments / parsedLimit);
+    const skipDocuments = (page - 1) * parsedLimit;
+
+    const keyword = query.split(':')[0];
+    const attribute = query.split(':')[1];
+
+    const regexAttribute = new RegExp(attribute, 'i');
+
+    const results = await selectedCollection
+      .find({ lang, [attribute]: regexAttribute })
+      .sort({ _id: 1 })
+      .skip(skipDocuments)
+      .limit(parsedLimit)
+      .toArray();
+
+    // If no results, return message
+    if (results.length === 0)
+      return res.json({ message: 'No cards found for this search query.' });
+
+    // Build response based on schema
+    const response = buildResponse(results, schema);
+
+    const data = {
+      count: totalDocuments,
+      pages: {
+        total: totalPages,
+        current: parseInt(page, 10),
+        count: results.length,
+      },
+      schema,
+      data: response,
+    };
+    res.json(data);
+  } catch (err) {
+    next(err);
+  } finally {
+    await client.close();
+  }
+}
+
+router.get('/:db/decks/:name?', async (req, res, next) => {
+  try {
+    const { db, name } = req.params;
+    await client.connect();
+    const decksCollection = client.db(db).collection('decks');
+    let decks;
+
+    if (name) {
+      decks = await decksCollection.find({ name }).toArray();
+    } else {
+      decks = await decksCollection.find().toArray();
+    }
+
+    res.json(decks);
+  } catch (err) {
+    next(err);
+  } finally {
+    await client.close();
+  }
+});
+
+router.post('/:db/decks', async (req, res, next) => {
+  try {
+    const { db } = req.params;
     const newDeck = req.body;
     if (!newDeck) {
       return res.status(400).json({ error: 'Missing deck in request body.' });
     }
     await client.connect();
-    const decksCollection = client.db(db).collection(collection);
+    const decksCollection = client.db(db).collection('decks');
     const result = await decksCollection.insertOne(newDeck);
     if (result.acknowledged) {
       res.json({
@@ -77,7 +158,9 @@ async function handlePage(req, res, next) {
   const { limit } = req.query;
 
   // Validate parameters
-  if (isNaN(page) || page < 1) {
+  let pageNum = parseInt(page, 10);
+
+  if (isNaN(pageNum) || pageNum < 1) {
     return res
       .status(400)
       .json({ error: 'Page must be a non-negative integer.' });

@@ -15,6 +15,7 @@ module.exports = {
       primary: "#70B6CE",
       secondary: "#5EADC8",
       txt: "#c8d5e6",
+      transparent:"#000000/0"
     },
   },
 

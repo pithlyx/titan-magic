@@ -3,30 +3,8 @@ import { BrowserRouter as Router, Route, Routes, useParams } from "react-router-
 import "./App.css"
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
-import ResizablePanels from "./components/Body/HorizontalResize";
 import CardDisplay from "./components/Body/CardDisplay";
-import DeckDisplay from "./components/Body/DeckDisplay";
-
-const DynamicComponents = {
-  carddisplay: CardDisplay,
-  deckdisplay: DeckDisplay
-}
-
-function DynamicPanel(bodyHeight) {
-  let { page1 = "carddisplay", page2 = "carddisplay" } = useParams();
-  page1 = page1.toLowerCase();
-  page2 = page2.toLowerCase();
-
-  const Component1 = DynamicComponents[page1];
-  const Component2 = DynamicComponents[page2];
-
-  return (
-    <ResizablePanels height={bodyHeight}>
-      {Component1 && <Component1 />}
-      {Component2 && <Component2 />}
-    </ResizablePanels>
-  );
-}
+import DynamicContainer from "./components/Body/DynamicContainer";
 
 function App() {
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -46,25 +24,40 @@ function App() {
       setFooterHeight(footerHeightInPixels);
     }
 
-    // Initial calculation
     calculateHeights();
 
-    // Recalculate heights on window resize
     window.addEventListener("resize", calculateHeights);
 
-    // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener("resize", calculateHeights);
     }
   }, []);
+
+    const [cardsData, setCardsData] = useState([]);
+  const [page, setPage] = useState(1);
+  console.log(cardsData)
+  const fetchData = () => {
+    fetch(
+      `http://localhost:1337/api/mongo/mtg/all-cards/en/face/${page}?limit=100`
+    )
+      .then((res) => res.json())
+      // .then((data) => console.log(data))
+      .then((data) => setCardsData((prevData) => [...prevData, ...data.data]))
+      .catch((err) => console.log(err));
+  };
+
+  useEffect(() => {
+    fetchData(page);
+  }, []);
+
 
   return (
     <Router>
       <div className="flex flex-col max-h-screen min-h-screen dark bg-bg">
         <Header height={headerHeight} />
         <Routes>
-          <Route path="/route/:page1/:page2" element={<DynamicPanel bodyHeight={bodyHeight}/>} />
-          <Route path="/" element={<CardDisplay />} />
+          <Route path="/route/:page1/:page2" element={<DynamicContainer bodyHeight={bodyHeight} cardsData={cardsData} fetchData={fetchData}/>} />
+          <Route path="/" element={<CardDisplay cardScale={2} fetchData={fetchData} cardsData={cardsData}/>} />
         </Routes>
         <Footer height={footerHeight} />
       </div>
